@@ -1,6 +1,8 @@
 package com.marquitobro.clashai
 
+import android.Manifest
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.content.Context
 import android.content.Intent
 import android.media.projection.MediaProjectionManager
@@ -45,10 +47,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ClashAiScreen(
-                onStartCapture = {
-                    val intent = projectionRequest.createScreenCaptureIntent()
-                    capturePermission.launch(intent)
-                },
+                onStartCapture = { beginCapture() },
                 onStopCapture = {
                     startService(Intent(this, ScreenCaptureService::class.java).apply {
                         action = ScreenCaptureService.ACTION_STOP
@@ -56,6 +55,26 @@ class MainActivity : ComponentActivity() {
                 }
             )
         }
+    }
+
+    private val notificationPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        launchCapturePermission()
+    }
+
+    private fun beginCapture() {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            launchCapturePermission()
+        }
+    }
+
+    private fun launchCapturePermission() {
+        capturePermission.launch(projectionRequest.createScreenCaptureIntent())
     }
 
     private val capturePermission = registerForActivityResult(
