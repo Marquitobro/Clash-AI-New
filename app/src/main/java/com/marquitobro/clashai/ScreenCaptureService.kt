@@ -105,8 +105,9 @@ class ScreenCaptureService : Service() {
         imageReader?.setOnImageAvailableListener(null, null)
         imageReader?.close()
         imageReader = null
-        projection?.stop()
+        val activeProjection = projection
         projection = null
+        activeProjection?.stop()
     }
 
     private fun createNotificationChannel() {
