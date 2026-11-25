@@ -1,19 +1,12 @@
-# Clash AI New
+# Clash Tracker Lite (experimental)
 
-Android app focused on showing the opponent's 8-card deck during a live Clash Royale match.
+A rewritten, compact Android overlay for replay analysis. Only opponent elixir estimation and observed cycle. No automatic gameplay, OCR, account credentials, or PC required.
 
-## Project status
-The app now includes an Android MediaProjection foreground service that captures screen frames after explicit user consent. Android 13 notification permission is requested before capture. The current build does not yet classify cards or detect match state; the eight slots remain placeholders.
+## Use
+Install the debug APK, grant permission to draw over other apps and capture the entire screen, then open a standard 1v1 replay. Press Inicio at the first moment of the match. The overlay can be dragged via its title. Automatic image recognition and the approximate clock then update the elixir and the last four detected plays. Pause and start resets the estimate.
 
-## Planned implementation
-1. ~~Android MediaProjection capture with explicit user consent.~~ Implemented as a foreground service.
-2. Match-state detection from captured frames.
-3. Visual recognition of cards played by the opponent.
-4. Deduplication and reconstruction of the opponent's 8-card deck.
-5. On-device inference and an optional overlay, without reading game memory, injecting into Clash Royale, or automating taps.
+## Limitations
+This version recognizes only 12 troop classes: archers, bomber, giant, goblin cage, goblin hut, goblins, knight, mini pekka, minions, musketeer, skeletons, spear goblins. Spells and other cards cannot be reliably counted; unknown classes may be misclassified. Badge calibration, confidence threshold and motion grouping are unvalidated on real phones. Cycle values 4 to 1 are approximate plays remaining for those observed cards in a normal cycle, not the opponent's full hand. Elixir starts at 5 with standard 1x/2x/3x schedule; misses, timing errors and special mechanics cause drift. Not a guaranteed accurate counter. Supercell may sanction live third-party assistance; prefer replays.
 
-## API note
-RoyaleAPI's former public developer API was sunset. Supercell's official Clash Royale API offers a recent battle-log endpoint for a player's own tag, but it does not identify an unknown opponent's full deck live during an ongoing match. Live deck reconstruction therefore depends on visual recognition.
-
-## Build
-GitHub Actions builds a debug APK on every push to main and on manual workflow dispatch.
+## Attribution
+Badge detection and crop preprocessing adapted from bytelabs-oss/clash-jev, copyright 2026 bytelabs-oss, MIT license. The pretrained model and license are fetched at the pinned revision c1f4893c1627d593938d53910c2568d1addcb8d2 at build time and bundled into the APK. Source: https://github.com/bytelabs-oss/clash-jev. Clash Royale and its assets belong to Supercell; this is unofficial.
