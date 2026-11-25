@@ -1,19 +1,10 @@
-# Clash AI New
+# Clash Tracker Pro — experimental
 
-Android app focused on showing the opponent's 8-card deck during a live Clash Royale match.
+Android local screen analysis for standard match replays. Only inferred opponent elixir and observed card cycle, no automated gameplay. Separate application ID from Lite.
 
-## Project status
-The app now includes an Android MediaProjection foreground service that captures screen frames after explicit user consent. Android 13 notification permission is requested before capture. The current build does not yet classify cards or detect match state; the eight slots remain placeholders.
+The build exports the 155-class YOLO26s detector published by PolarisMurray/Clash_AI (repository MIT license, pinned source revision 7de479bfc9ad70c8238741b6b6629cd6bf01716c). Labels come directly from checkpoint metadata, and ONNX output is checked before APK compilation. Card costs are drawn from the public RoyaleAPI/cr-api-data reference. The 187-class SudhishNeel model is not distributed here because its license terms are unspecified. See upstream model and tool licenses; this project does not assert a separate weight license beyond upstream's publication.
 
-## Planned implementation
-1. ~~Android MediaProjection capture with explicit user consent.~~ Implemented as a foreground service.
-2. Match-state detection from captured frames.
-3. Visual recognition of cards played by the opponent.
-4. Deduplication and reconstruction of the opponent's 8-card deck.
-5. On-device inference and an optional overlay, without reading game memory, injecting into Clash Royale, or automating taps.
+155 classes are visual categories, not 155 distinct playable cards. A detection only enters the tracker if its canonical name has a known reference cost and a red-color evidence heuristic succeeds. Unknown labels, spell effects, side ambiguity, duplicate spawns, variant costs, new cards, summoned units and special mechanics may be missed or misclassified. The cycle is an observed approximation and the elixir is inferred, not read from game memory. The actual accuracy and speed must be measured on a real device. Use recorded games or replays; third-party live assistance may violate Supercell rules.
 
-## API note
-RoyaleAPI's former public developer API was sunset. Supercell's official Clash Royale API offers a recent battle-log endpoint for a player's own tag, but it does not identify an unknown opponent's full deck live during an ongoing match. Live deck reconstruction therefore depends on visual recognition.
-
-## Build
-GitHub Actions builds a debug APK on every push to main and on manual workflow dispatch.
+Source: https://github.com/PolarisMurray/Clash_AI
+Reference costs: https://github.com/RoyaleAPI/cr-api-data
