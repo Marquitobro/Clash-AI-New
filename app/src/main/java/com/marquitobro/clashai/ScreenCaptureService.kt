@@ -37,9 +37,13 @@ class ScreenCaptureService : Service() {
     private var count=0
     private var lastFrame=0L
     private var lastProcessed=0L
+    @Volatile private var lastCapture=0L
+    private var report="Esperando primer análisis"
+    private var frames=0
+    private var latency=0L
     private var seen=mutableListOf<Track>()
     private val plays=mutableListOf<LiteVision.Seen>()
-    private data class Track(var unit: LiteVision.Seen,var last: Long,var hits: Int=1,var counted: Boolean=false)
+    private class Track(var unit: LiteVision.Seen,var last: Long,var hits: Int=1,var counted: Boolean=false)
     private fun now()=SystemClock.elapsedRealtime()
     private fun speed(at: Long): Int {
         val elapsed=(at-started)/1000
@@ -62,18 +66,24 @@ class ScreenCaptureService : Service() {
             tick(now())
             info?.text=if(active) "Elixir ≈ " + String.format(java.util.Locale.US,"%.1f",elixir) + "/10" else "Elixir: —"
             cycle?.text=if(plays.isEmpty()) "Ciclo: sin detecciones" else "Ciclo observado\n"+plays.takeLast(4).reversed().mapIndexed { i,c -> c.card+" · "+(4-i) }.joinToString("\n")
-            if(active) status?.text=if(now()-lastFrame>3500) "Sin captura reciente" else "x"+speed(now())+" · "+count+" jugadas (155 clases)"
+            if(active) status?.text=when {
+                lastCapture==0L || now()-lastCapture>4000 -> "Sin fotogramas recientes · puede estar procesando"
+                frames==0 -> "Captura OK · esperando IA"
+                now()-lastFrame>12000 -> "Captura OK · IA lenta\n"+report
+                else -> "x"+speed(now())+" · "+count+" jugadas · "+frames+" imgs\n"+report+"\nIA: "+latency+" ms"
+            }
             ui.postDelayed(this,250)
         }
     }
     private fun stopSession() {
         active=false; generation++; toggle?.text="Inicio"; status?.text="En pausa"
     }
-    private fun updateUnits(units: List<LiteVision.Seen>,at: Long,token: Int) {
+    private fun updateUnits(units: List<LiteVision.Seen>,at: Long,token: Int,diagnosis: String,ms: Long) {
         if(!active || token!=generation) return
-        lastFrame=at
+        lastFrame=now()
+        report=diagnosis; frames++; latency=ms
         tick(now())
-        seen.removeAll { at-it.last>2200 }
+        seen.removeAll { at-it.last>maxOf(4500L,ms*3) }
         val used=mutableSetOf<Track>()
         val newPlays=mutableListOf<LiteVision.Seen>()
         for(u in units) {
@@ -105,17 +115,17 @@ class ScreenCaptureService : Service() {
             orientation=LinearLayout.VERTICAL; setPadding(dp(8),dp(4),dp(8),dp(4))
             setBackgroundColor(Color.argb(230,20,24,37))
         }
-        val head=TextView(this).apply { text="TRACKER PRO · mover"; setTextColor(Color.LTGRAY); textSize=10f }
+        val head=TextView(this).apply { text="TRACKER PRO 2.1 · mover"; setTextColor(Color.LTGRAY); textSize=10f }
         info=TextView(this).apply { text="Elixir: —"; setTextColor(Color.rgb(230,168,255)); textSize=18f; setTypeface(null,Typeface.BOLD) }
         cycle=TextView(this).apply { text="Ciclo: sin detecciones"; setTextColor(Color.WHITE); textSize=11f; maxWidth=dp(160) }
-        status=TextView(this).apply { text="Cargando modelo…"; setTextColor(Color.LTGRAY); textSize=10f }
+        status=TextView(this).apply { text="Cargando modelo…"; setTextColor(Color.LTGRAY); textSize=10f; maxWidth=dp(210) }
         val controls=LinearLayout(this).apply { orientation=LinearLayout.HORIZONTAL }
         toggle=Button(this).apply {
             text="Inicio"; isEnabled=false; textSize=11f; minWidth=0; minimumWidth=0
             setOnClickListener {
                 if(active) stopSession() else {
                     generation++; started=now(); last=started; elixir=5.0; count=0
-                    lastFrame=started; lastProcessed=0; seen.clear(); plays.clear()
+                    lastFrame=started; lastProcessed=0; lastCapture=0; frames=0; report="Esperando primer análisis"; seen.clear(); plays.clear()
                     active=true; text="Pausa"
                 }
             }
@@ -171,14 +181,31 @@ class ScreenCaptureService : Service() {
                 val image=try { rr.acquireLatestImage() } catch(_:Exception){ null } ?: return@setOnImageAvailableListener
                 try {
                     val v=vision; val at=now(); val token=generation
+                    lastCapture=at
                     if(active && v!=null && at-lastRead>=900) {
                         lastRead=at
                         val plane=image.planes[0]; val stride=plane.rowStride/plane.pixelStride
                         val raw=Bitmap.createBitmap(stride,h,Bitmap.Config.ARGB_8888)
                         try {
-                            raw.copyPixelsFromBuffer(plane.buffer)
+                            val buffer=plane.buffer
+                            val row=ByteArray(w*4)
+                            val pixels=IntArray(w)
+                            for(y in 0 until h) {
+                                buffer.position(y*plane.rowStride)
+                                buffer.get(row)
+                                for(x in 0 until w) {
+                                    val i=x*4
+                                    pixels[x]=Color.argb(255,row[i].toInt() and 255,row[i+1].toInt() and 255,row[i+2].toInt() and 255)
+                                }
+                                raw.setPixels(pixels,0,w,0,y,w,1)
+                            }
                             val frame=Bitmap.createBitmap(raw,0,0,w,h)
-                            try { val units=v.detect(frame); ui.post { updateUnits(units,at,token) } }
+                            try {
+                                val units=v.detect(frame)
+                                val diagnosis=v.diagnostic
+                                val ms=now()-at
+                                ui.post { updateUnits(units,at,token,diagnosis,ms) }
+                            }
                             finally { if(frame!==raw) frame.recycle() }
                         } finally { raw.recycle() }
                     }
