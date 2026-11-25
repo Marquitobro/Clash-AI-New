@@ -8,6 +8,9 @@ import android.content.Intent
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.net.Uri
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -63,7 +66,19 @@ class MainActivity : ComponentActivity() {
         launchCapturePermission()
     }
 
+    private val overlayPermission = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (Settings.canDrawOverlays(this)) beginCapture()
+        else Toast.makeText(this, "Permite aparecer encima de otras apps.", Toast.LENGTH_LONG).show()
+    }
+
     private fun beginCapture() {
+        if (!Settings.canDrawOverlays(this)) {
+            overlayPermission.launch(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName")))
+            return
+        }
         if (Build.VERSION.SDK_INT >= 33 &&
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) {
@@ -90,6 +105,7 @@ class MainActivity : ComponentActivity() {
             } else {
                 startService(serviceIntent)
             }
+            moveTaskToBack(true)
         }
     }
 }
@@ -101,19 +117,19 @@ private fun ClashAiScreen(onStartCapture: () -> Unit, onStopCapture: () -> Unit)
             Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("CLASH AI", color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.Black)
-                    Text("MAZO DEL RIVAL", color = Color(0xFF91A4C2), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text("PRUEBA DE VENTANA FLOTANTE", color = Color(0xFF91A4C2), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
                 Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFF1C2636)), shape = RoundedCornerShape(16.dp)) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text("Captura de pantalla", color = Color(0xFF91A4C2), fontSize = 12.sp)
-                        Text("Autoriza la captura para preparar el análisis visual.", color = Color.White, fontWeight = FontWeight.SemiBold)
+                        Text("Activa el botón flotante y permite la captura de toda la pantalla.", color = Color.White, fontWeight = FontWeight.SemiBold)
                         Button(onClick = onStartCapture, modifier = Modifier.fillMaxWidth()) {
-                            Text("Activar captura")
+                            Text("Activar botón flotante")
                         }
                         Button(onClick = onStopCapture, modifier = Modifier.fillMaxWidth()) {
                             Text("Detener captura")
                         }
-                        Text("La captura funciona, pero el reconocimiento de cartas aún no está integrado.", color = Color(0xFFB7C2D4), fontSize = 12.sp)
+                        Text("Abre Clash Royale después de autorizar. El botón comprueba los fotogramas recibidos; aún no reconoce cartas ni juega.", color = Color(0xFFB7C2D4), fontSize = 12.sp)
                     }
                 }
                 Text("Últimas 8 cartas detectadas", color = Color.White, fontWeight = FontWeight.Bold)
