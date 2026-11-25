@@ -62,7 +62,7 @@ class ScreenCaptureService : Service() {
             tick(now())
             info?.text=if(active) "Elixir ≈ " + String.format(java.util.Locale.US,"%.1f",elixir) + "/10" else "Elixir: —"
             cycle?.text=if(plays.isEmpty()) "Ciclo: sin detecciones" else "Ciclo observado\n"+plays.takeLast(4).reversed().mapIndexed { i,c -> c.card+" · "+(4-i) }.joinToString("\n")
-            if(active) status?.text=if(now()-lastFrame>3500) "Sin captura reciente" else "x"+speed(now())+" · "+count+" jugadas (12 tipos)"
+            if(active) status?.text=if(now()-lastFrame>3500) "Sin captura reciente" else "x"+speed(now())+" · "+count+" jugadas (155 clases)"
             ui.postDelayed(this,250)
         }
     }
@@ -105,7 +105,7 @@ class ScreenCaptureService : Service() {
             orientation=LinearLayout.VERTICAL; setPadding(dp(8),dp(4),dp(8),dp(4))
             setBackgroundColor(Color.argb(230,20,24,37))
         }
-        val head=TextView(this).apply { text="TRACKER LITE · mover"; setTextColor(Color.LTGRAY); textSize=10f }
+        val head=TextView(this).apply { text="TRACKER PRO · mover"; setTextColor(Color.LTGRAY); textSize=10f }
         info=TextView(this).apply { text="Elixir: —"; setTextColor(Color.rgb(230,168,255)); textSize=18f; setTypeface(null,Typeface.BOLD) }
         cycle=TextView(this).apply { text="Ciclo: sin detecciones"; setTextColor(Color.WHITE); textSize=11f; maxWidth=dp(160) }
         status=TextView(this).apply { text="Cargando modelo…"; setTextColor(Color.LTGRAY); textSize=10f }
@@ -147,7 +147,7 @@ class ScreenCaptureService : Service() {
         val nm=getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(NotificationChannel("capture","Captura",NotificationManager.IMPORTANCE_LOW))
         val stop=PendingIntent.getService(this,1,Intent(this,ScreenCaptureService::class.java).setAction("stop"),PendingIntent.FLAG_IMMUTABLE)
-        val n=Notification.Builder(this,"capture").setContentTitle("Clash Tracker Lite").setContentText("Captura local")
+        val n=Notification.Builder(this,"capture").setContentTitle("Clash Tracker Pro").setContentText("Captura local")
             .setSmallIcon(android.R.drawable.ic_menu_view).setOngoing(true).addAction(Notification.Action.Builder(null,"Cerrar",stop).build()).build()
         if(Build.VERSION.SDK_INT>=29) startForeground(1,n,android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION) else startForeground(1,n)
         try {
@@ -158,7 +158,7 @@ class ScreenCaptureService : Service() {
             val thread=HandlerThread("tracker-vision").apply { start() }; worker=thread
             val bg=Handler(thread.looper)
             bg.post {
-                try { vision=LiteVision(this); ui.post { status?.text="Listo · 12 tipos"; toggle?.isEnabled=true } }
+                try { vision=LiteVision(this); ui.post { status?.text="Listo · 155 clases"; toggle?.isEnabled=true } }
                 catch(e:Exception) { ui.post { status?.text="Error del modelo: "+e.javaClass.simpleName } }
             }
             val dm=android.util.DisplayMetrics()
@@ -171,7 +171,7 @@ class ScreenCaptureService : Service() {
                 val image=try { rr.acquireLatestImage() } catch(_:Exception){ null } ?: return@setOnImageAvailableListener
                 try {
                     val v=vision; val at=now(); val token=generation
-                    if(active && v!=null && at-lastRead>=550) {
+                    if(active && v!=null && at-lastRead>=900) {
                         lastRead=at
                         val plane=image.planes[0]; val stride=plane.rowStride/plane.pixelStride
                         val raw=Bitmap.createBitmap(stride,h,Bitmap.Config.ARGB_8888)
@@ -185,7 +185,7 @@ class ScreenCaptureService : Service() {
                 } catch(e:Exception) { ui.post { stopSession(); status?.text="Error de captura: "+e.javaClass.simpleName } }
                 finally { image.close() }
             },bg)
-            display=p.createVirtualDisplay("TrackerLite",w,h,dm.densityDpi,DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,r.surface,null,bg)
+            display=p.createVirtualDisplay("TrackerPro",w,h,dm.densityDpi,DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,r.surface,null,bg)
         } catch(e:Exception) { Toast.makeText(this,"No se pudo iniciar: "+e.javaClass.simpleName,Toast.LENGTH_LONG).show(); stopSelf() }
         return START_NOT_STICKY
     }
