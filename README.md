@@ -1,12 +1,10 @@
-# Clash Tracker Lite (experimental)
+# Clash Tracker Pro — experimental
 
-A rewritten, compact Android overlay for replay analysis. Only opponent elixir estimation and observed cycle. No automatic gameplay, OCR, account credentials, or PC required.
+Android local screen analysis for standard match replays. Only inferred opponent elixir and observed card cycle, no automated gameplay. Separate application ID from Lite.
 
-## Use
-Install the debug APK, grant permission to draw over other apps and capture the entire screen, then open a standard 1v1 replay. Press Inicio at the first moment of the match. The overlay can be dragged via its title. Automatic image recognition and the approximate clock then update the elixir and the last four detected plays. Pause and start resets the estimate.
+The build exports the 155-class YOLO26s detector published by PolarisMurray/Clash_AI (repository MIT license, pinned source revision 7de479bfc9ad70c8238741b6b6629cd6bf01716c). Labels come directly from checkpoint metadata, and ONNX output is checked before APK compilation. Card costs are drawn from the public RoyaleAPI/cr-api-data reference. The 187-class SudhishNeel model is not distributed here because its license terms are unspecified. See upstream model and tool licenses; this project does not assert a separate weight license beyond upstream's publication.
 
-## Limitations
-This version recognizes only 12 troop classes: archers, bomber, giant, goblin cage, goblin hut, goblins, knight, mini pekka, minions, musketeer, skeletons, spear goblins. Spells and other cards cannot be reliably counted; unknown classes may be misclassified. Badge calibration, confidence threshold and motion grouping are unvalidated on real phones. Cycle values 4 to 1 are approximate plays remaining for those observed cards in a normal cycle, not the opponent's full hand. Elixir starts at 5 with standard 1x/2x/3x schedule; misses, timing errors and special mechanics cause drift. Not a guaranteed accurate counter. Supercell may sanction live third-party assistance; prefer replays.
+155 classes are visual categories, not 155 distinct playable cards. A detection only enters the tracker if its canonical name has a known reference cost and a red-color evidence heuristic succeeds. Unknown labels, spell effects, side ambiguity, duplicate spawns, variant costs, new cards, summoned units and special mechanics may be missed or misclassified. The cycle is an observed approximation and the elixir is inferred, not read from game memory. The actual accuracy and speed must be measured on a real device. Use recorded games or replays; third-party live assistance may violate Supercell rules.
 
-## Attribution
-Badge detection and crop preprocessing adapted from bytelabs-oss/clash-jev, copyright 2026 bytelabs-oss, MIT license. The pretrained model and license are fetched at the pinned revision c1f4893c1627d593938d53910c2568d1addcb8d2 at build time and bundled into the APK. Source: https://github.com/bytelabs-oss/clash-jev. Clash Royale and its assets belong to Supercell; this is unofficial.
+Source: https://github.com/PolarisMurray/Clash_AI
+Reference costs: https://github.com/RoyaleAPI/cr-api-data
