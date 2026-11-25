@@ -129,10 +129,10 @@ private fun ClashAiScreen(onStartCapture: () -> Unit, onStopCapture: () -> Unit)
                         Button(onClick = onStopCapture, modifier = Modifier.fillMaxWidth()) {
                             Text("Detener captura")
                         }
-                        Text("Abre Clash Royale después de autorizar. El botón comprueba los fotogramas recibidos; aún no reconoce cartas ni juega.", color = Color(0xFFB7C2D4), fontSize = 12.sp)
+                        Text("Abre el juego o una repetición. Activa AI, pulsa Nueva partida y confirma los nombres de carta que el OCR detecte. El cálculo es aproximado; no juega automáticamente.", color = Color(0xFFB7C2D4), fontSize = 12.sp)
                     }
                 }
-                Text("Últimas 8 cartas detectadas", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("Seguimiento disponible en la ventana flotante", color = Color.White, fontWeight = FontWeight.Bold)
                 LazyVerticalGrid(columns = GridCells.Fixed(4), modifier = Modifier.weight(1f), contentPadding = PaddingValues(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     items((1..8).toList()) { _ ->
                         Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF202B3D)), shape = RoundedCornerShape(12.dp)) {
@@ -142,7 +142,7 @@ private fun ClashAiScreen(onStartCapture: () -> Unit, onStopCapture: () -> Unit)
                         }
                     }
                 }
-                Text("No se muestran cartas inventadas: se añadirán cuando el modelo visual las reconozca.", color = Color(0xFF91A4C2), fontSize = 11.sp)
+                Text("OCR experimental: no identifica dibujos de tropas. Usa preferentemente grabaciones o repeticiones.", color = Color(0xFF91A4C2), fontSize = 11.sp)
             }
         }
     }
