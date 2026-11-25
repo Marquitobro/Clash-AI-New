@@ -8,11 +8,11 @@ android {
     namespace = "com.marquitobro.clashai"
     compileSdk = 35
     defaultConfig {
-        applicationId = "com.marquitobro.clashtracker.lite"
+        applicationId = "com.marquitobro.clashtracker.pro"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0-experimental"
+        versionName = "2.0-experimental"
     }
     buildFeatures { compose = true }
     compileOptions {
