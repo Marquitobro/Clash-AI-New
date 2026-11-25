@@ -1,15 +1,12 @@
-# Clash AI — Android experimental
-Standalone Kotlin app for Android 8+. No PC required to run. This branch is a test version, not a complete autonomous player.
+# Clash Tracker Lite (experimental)
 
-## Implemented
-- MediaProjection capture after explicit consent and an Android system overlay.
-- Real on-device ML Kit OCR, limited to visible text matching a partial Spanish/English card dictionary.
-- Manual confirmation of opponent card observations; elapsed-time elixir estimate, manually selected regeneration multiplier, observed unique cards and last four plays.
-- Simple textual suggestions based on estimated elixir, not a trained game-playing policy.
-- Unit tests and APK CI.
+A rewritten, compact Android overlay for replay analysis. Only opponent elixir estimation and observed cycle. No automatic gameplay, OCR, account credentials, or PC required.
 
-## How to try
-Install the debug APK from a successful Actions run. Open the app, allow overlay and full-screen capture, then open a replay or screen recording. Tap AI · Analizar, tap Nueva partida at the beginning of a standard match, and confirm only genuine opponent deployments. Choose x2 or x3 when the mode changes regeneration. Tap Cerrar to stop capture.
-OCR is not a visual troop detector; names may not be shown in live play, and confirmation can be wrong or incomplete. The estimate cannot reveal the true hidden elixir and does not model every mechanic. The cycle is observed history, not a complete prediction. No autonomous taps or trained policy are included. Device testing and a trained visual detector are required before further functionality can be claimed.
+## Use
+Install the debug APK, grant permission to draw over other apps and capture the entire screen, then open a standard 1v1 replay. Press Inicio at the first moment of the match. The overlay can be dragged via its title. Automatic image recognition and the approximate clock then update the elixir and the last four detected plays. Pause and start resets the estimate.
 
-Supercell prohibits gameplay bots and automation. Use for analysis of recordings/replays; no guarantee of account safety in live play.
+## Limitations
+This version recognizes only 12 troop classes: archers, bomber, giant, goblin cage, goblin hut, goblins, knight, mini pekka, minions, musketeer, skeletons, spear goblins. Spells and other cards cannot be reliably counted; unknown classes may be misclassified. Badge calibration, confidence threshold and motion grouping are unvalidated on real phones. Cycle values 4 to 1 are approximate plays remaining for those observed cards in a normal cycle, not the opponent's full hand. Elixir starts at 5 with standard 1x/2x/3x schedule; misses, timing errors and special mechanics cause drift. Not a guaranteed accurate counter. Supercell may sanction live third-party assistance; prefer replays.
+
+## Attribution
+Badge detection and crop preprocessing adapted from bytelabs-oss/clash-jev, copyright 2026 bytelabs-oss, MIT license. The pretrained model and license are fetched at the pinned revision c1f4893c1627d593938d53910c2568d1addcb8d2 at build time and bundled into the APK. Source: https://github.com/bytelabs-oss/clash-jev. Clash Royale and its assets belong to Supercell; this is unofficial.
