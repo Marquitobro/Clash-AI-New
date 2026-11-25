@@ -35,11 +35,11 @@ class MainActivity : ComponentActivity() {
             orientation = LinearLayout.VERTICAL
             setPadding(32, 64, 32, 32)
             addView(TextView(context).apply {
-                text = "Clash Tracker Lite"
+                text = "Clash Tracker Pro"
                 textSize = 28f
             })
             addView(TextView(context).apply {
-                text = "Elixir estimado y ciclo observado. Detector visual experimental de 12 tropas. Inicia la ventana, comparte toda la pantalla y pulsa Inicio al comenzar una repetición estándar. No detecta todos los hechizos."
+                text = "Elixir estimado y ciclo observado. Detector visual YOLO experimental de 155 clases, no todas son cartas. Inicia la ventana, comparte toda la pantalla y pulsa Inicio al comenzar una repetición estándar. Solo se contabilizan detecciones con coste y evidencia rival."
                 textSize = 16f
             })
             addView(Button(context).apply {
