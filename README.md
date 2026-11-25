@@ -1,19 +1,15 @@
-# Clash AI New
+# Clash AI — Android experimental
+Standalone Kotlin app for Android 8+. No PC required to run. This branch is a test version, not a complete autonomous player.
 
-Android app focused on showing the opponent's 8-card deck during a live Clash Royale match.
+## Implemented
+- MediaProjection capture after explicit consent and an Android system overlay.
+- Real on-device ML Kit OCR, limited to visible text matching a partial Spanish/English card dictionary.
+- Manual confirmation of opponent card observations; elapsed-time elixir estimate, manually selected regeneration multiplier, observed unique cards and last four plays.
+- Simple textual suggestions based on estimated elixir, not a trained game-playing policy.
+- Unit tests and APK CI.
 
-## Project status
-The app now includes an Android MediaProjection foreground service that captures screen frames after explicit user consent. Android 13 notification permission is requested before capture. The current build does not yet classify cards or detect match state; the eight slots remain placeholders.
+## How to try
+Install the debug APK from a successful Actions run. Open the app, allow overlay and full-screen capture, then open a replay or screen recording. Tap AI · Analizar, tap Nueva partida at the beginning of a standard match, and confirm only genuine opponent deployments. Choose x2 or x3 when the mode changes regeneration. Tap Cerrar to stop capture.
+OCR is not a visual troop detector; names may not be shown in live play, and confirmation can be wrong or incomplete. The estimate cannot reveal the true hidden elixir and does not model every mechanic. The cycle is observed history, not a complete prediction. No autonomous taps or trained policy are included. Device testing and a trained visual detector are required before further functionality can be claimed.
 
-## Planned implementation
-1. ~~Android MediaProjection capture with explicit user consent.~~ Implemented as a foreground service.
-2. Match-state detection from captured frames.
-3. Visual recognition of cards played by the opponent.
-4. Deduplication and reconstruction of the opponent's 8-card deck.
-5. On-device inference and an optional overlay, without reading game memory, injecting into Clash Royale, or automating taps.
-
-## API note
-RoyaleAPI's former public developer API was sunset. Supercell's official Clash Royale API offers a recent battle-log endpoint for a player's own tag, but it does not identify an unknown opponent's full deck live during an ongoing match. Live deck reconstruction therefore depends on visual recognition.
-
-## Build
-GitHub Actions builds a debug APK on every push to main and on manual workflow dispatch.
+Supercell prohibits gameplay bots and automation. Use for analysis of recordings/replays; no guarantee of account safety in live play.
